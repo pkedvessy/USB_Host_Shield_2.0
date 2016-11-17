@@ -189,23 +189,14 @@ void BTHID::ACLData(uint8_t* l2capinbuf) {
                                 uint16_t length = ((uint16_t)l2capinbuf[5] << 8 | l2capinbuf[4]);
                                 ParseBTHIDData((uint8_t)(length - 1), &l2capinbuf[9]);
 
-                                switch(l2capinbuf[9]) {
-                                        case 0x01: // Keyboard or Joystick events
-                                                if(pRptParser[KEYBOARD_PARSER_ID])
-                                                        pRptParser[KEYBOARD_PARSER_ID]->Parse(reinterpret_cast<USBHID *>(this), 0, (uint8_t)(length - 2), &l2capinbuf[10]); // Use reinterpret_cast again to extract the instance
-                                                break;
-
-                                        case 0x02: // Mouse events
-                                                if(pRptParser[MOUSE_PARSER_ID])
-                                                        pRptParser[MOUSE_PARSER_ID]->Parse(reinterpret_cast<USBHID *>(this), 0, (uint8_t)(length - 2), &l2capinbuf[10]); // Use reinterpret_cast again to extract the instance
-                                                break;
+								if(pRptParser[l2capinbuf[9]])
+									pRptParser[l2capinbuf[9]]->Parse(reinterpret_cast<USBHID *>(this), 0, (uint8_t)(length - 2), &l2capinbuf[10]); // Use reinterpret_cast again to extract the instance
 #ifdef EXTRADEBUG
-                                        default:
-                                                Notify(PSTR("\r\nUnknown Report type: "), 0x80);
-                                                D_PrintHex<uint8_t > (l2capinbuf[9], 0x80);
-                                                break;
-#endif
+                                else {
+                                    Notify(PSTR("\r\nUnknown Report type: "), 0x80);
+                                    D_PrintHex<uint8_t > (l2capinbuf[9], 0x80);
                                 }
+#endif
                         }
                 } else if(l2capinbuf[6] == control_dcid[0] && l2capinbuf[7] == control_dcid[1]) { // l2cap_control
 #ifdef PRINTREPORT
